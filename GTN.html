@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTN - NADev</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+</head>
+<style>
+.preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    }
+    .preloader.hidden {
+        display: none;
+    }
+   .shadow {
+     box-shadow: 10px 10px 20px 5px rgba(0, 0, 0, 0.2);
+   }
+   .collapse-icon {
+     transition: transform 0.3s;
+   }
+   .collapsed .collapse-icon {
+     transform: rotate(180deg);
+   }
+   .translate-btn {
+       position: fixed;
+       top: 10px;
+       right: 20px;
+       z-index: 1000;
+   }
+   .card {
+       border-radius: 0.5rem;
+   }
+   @media (max-width: 576px) {
+       .container {
+           width: 100%;
+           padding-left: 15px;
+           padding-right: 15px;
+       }
+   }
+   @media (min-width: 576px) {
+       .container {
+           width: 100%;
+           max-width: 540px;
+       }
+   }
+   @media (min-width: 768px) {
+       .container {
+           max-width: 720px;
+       }
+   }
+   @media (min-width: 992px) {
+       .container {
+           max-width: 960px;
+       }
+   }
+   @media (min-width: 1200px) {
+       .container {
+           max-width: 1140px;
+       }
+   }
+</style>
+<body>
+    <!-- Top right button for translation -->
+    <button class="btn btn-sm btn-secondary translate-btn" onclick="toggleLanguage()">বাংলায় দেখুন</button>
+
+    <div class="preloader">
+        <div class="spinner-grow text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <div class="spinner-grow text-danger" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <div class="spinner-grow text-warning" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <div class="spinner-grow text-success" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+    </div>
+    <!-- Main content -->
+    <div class="container mt-5" style="max-width: 31rem;">
+        <div class="d-flex justify-content-center mt-5">
+            <div class="card shadow" style="width: 100%; max-width: 30rem;">
+                <div class="card-header bg-primary text-white">
+                  <h5 class="text-center" id="header">Welcome to GTN</h5>
+                </div>
+                <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label for="">Game status:</label>
+                            <button class="btn btn-danger btn-sm" id="resetButton">Reset records</button>
+                        </div>
+                        <hr>
+                        <ul class="list-unstyled">
+                            <li>Total Attempts: <span id="attempts">0</span></li>
+                            <li>Total Wins: <span id="wins">0</span></li>
+                        </ul>
+                    <label for="" class="text-start mb-3" id="label">Put a number between 1 to 9</label>
+                    <input type="number" class="form-control" id="userNumber" placeholder="Enter a number between 1 and 9" min="1" max="9">
+                    <button class="btn btn-primary w-100 mt-3" onclick="checkNumber()" id="checkButton" disabled>Check Number</button>
+                </div>
+                <div class="card-footer text-center">
+                  Made By <a href="https://www.facebook.com/developeramena">NADev</a>
+                </div>
+            </div>
+        </div>
+         <div class="mt-3">
+            <div class="shadow" style="width: 100%; max-width: 30rem;">
+                <button class="btn w-100 border" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                    <div class="d-flex justify-content-between">
+                        <span class="me-2" id="question">How to play the game?</span>
+                        <i class="collapse-icon fas fa-chevron-down"></i>
+                    </div>
+                </button>
+            </div>
+            <div class="collapse mt-1" id="collapseExample">
+                <div class="card card-body" style="width: 100%; max-width: 30rem;">
+                    <p id="instructions">
+                        1. Enter a number between 1-9.<br>
+                        2. Click "Check Number" to see if you guessed correctly.<br>
+                        3. If you match, you'll win!<br>
+                        4. Try as many times as you like.<br>
+                        Enjoy the game! <br>
+                        5. Your number is always saved, until you reset it.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Hide the preloader once the page is fully loaded
+    window.addEventListener('load', function() {
+    document.querySelector('.preloader').classList.add('hidden');
+    });
+
+    // Retrieve and display initial values from Local Storage
+    function initializeValues() {
+    let attempts = parseInt(localStorage.getItem('total_attempts')) || 0;
+    let wins = parseInt(localStorage.getItem('total_wins')) || 0;
+
+    document.getElementById('attempts').textContent = attempts;
+    document.getElementById('wins').textContent = wins;
+    }
+    let isBengali = false; // Track the language state
+// Add the event listener correctly
+document.getElementById('userNumber').addEventListener('input', validateInput);
+
+function validateInput() {
+    const userNumber = document.getElementById('userNumber').value;
+    const checkButton = document.getElementById('checkButton');
+
+    // Validate the input value
+    if (userNumber >= 1 && userNumber <= 9) {
+        checkButton.disabled = false;
+    } else {
+        checkButton.disabled = true;
+    }
+}
+
+        // Function to check the number and update attempts and wins
+        function checkNumber() {
+            const userNumber = parseInt(document.getElementById('userNumber').value);
+            const randomNumber = Math.floor(Math.random() * 9) + 1;
+
+            // Retrieve existing values from Local Storage
+            let attempts = parseInt(localStorage.getItem('total_attempts')) || 0;
+            let wins = parseInt(localStorage.getItem('total_wins')) || 0;
+
+            // Increment attempts
+            attempts++;
+            document.getElementById('attempts').textContent = attempts;
+
+            // Check if the guess is correct
+            if (userNumber === randomNumber) {
+                wins++;
+                // Swal.fire({
+                //     icon: 'success',
+                //     title: 'Congratulations!',
+                    text: `You guessed the right number: ${randomNumber}`
+                // });
+                Swal.fire({
+                title: `Success, You guessed the right number!: ${randomNumber}`,
+                width: 350,
+                padding: "2em",
+                color: "#fff",
+                background: "#716add",
+                backdrop: `
+                    rgba(0,0,123,0.4)
+                    url("nyan-cat.gif")
+                    left top
+                    no-repeat
+                `
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Try Again',
+                    text: `You guessed ${userNumber}, but the correct number was ${randomNumber}`
+                });
+            }
+            
+            // Update the wins display
+            document.getElementById('wins').textContent = wins;
+
+            // Store updated values in Local Storage
+            localStorage.setItem('total_attempts', attempts);
+            localStorage.setItem('total_wins', wins);
+        }
+
+    function toggleLanguage() {
+        isBengali = !isBengali; // Toggle language state
+
+        if (isBengali) {
+            document.getElementById('header').textContent = 'জিটিএন-এ স্বাগতম';
+            document.getElementById('label').textContent = '১ থেকে ৯ এর মধ্যে একটি সংখ্যা লিখুন';
+            document.getElementById('checkButton').textContent = 'সংখ্যা যাচাই করুন';
+            document.getElementById('question').textContent = 'গেমটি কীভাবে খেলবেন?';
+            document.getElementById('instructions').innerHTML = 
+                '১. ১-৯ এর মধ্যে একটি সংখ্যা প্রবেশ করুন।<br>' +
+                '২. "চেক নম্বর" ক্লিক করুন এবং দেখুন আপনার অনুমান সঠিক কিনা।<br>' +
+                '৩. যদি সংখ্যা মিলে যায়, আপনি জিতবেন!<br>' +
+                '৪. যতবার ইচ্ছা ততবার চেষ্টা করুন।<br>' +
+                'গেমটি উপভোগ করুন!<br>' +
+                '৫. আপনার সংখ্যা সর্বদা সংরক্ষিত, যতক্ষণ না আপনি তা রিসেট করছেন';
+            document.getElementById('statsHeader').textContent = 'গেমের পরিসংখ্যান';
+            document.querySelector('.translate-btn').textContent = 'Show in English';
+        } else {
+            document.getElementById('header').textContent = 'Welcome to GTN';
+            document.getElementById('label').textContent = 'Put a number between 1 to 9';
+            document.getElementById('checkButton').textContent = 'Check Number';
+            document.getElementById('question').textContent = 'How to play the game?';
+            document.getElementById('instructions').innerHTML = 
+                '1. Enter a number between 1-9.<br>' +
+                '2. Click "Check Number" to see if you guessed correctly.<br>' +
+                '3. If you match, you\'ll win!<br>' +
+                '4. Try as many times as you like.<br>' +
+                'Enjoy the game!<br>' +
+                '5. Your number is always saved, until you reset it.';
+            document.getElementById('statsHeader').textContent = 'Game Stats';
+            document.querySelector('.translate-btn').textContent = 'বাংলায় দেখুন';
+        }
+    }
+            // Function to reset total_attempts and total_wins
+            function resetData() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This will reset all attempts and wins data!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, reset it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.removeItem('total_attempts');
+                    localStorage.removeItem('total_wins');
+                    initializeValues(); // Refresh the display
+                    Swal.fire(
+                        'Reset!',
+                        'Your data has been reset.',
+                        'success'
+                    );
+                }
+            });
+        }
+    // Initialize values on page load
+    window.addEventListener('load', initializeValues);
+    document.getElementById('resetButton').addEventListener('click', resetData);
+    </script>
+</body>
+</html>
